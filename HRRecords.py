@@ -1,15 +1,22 @@
 # importing module
-import oracledb
-import sys
-import datetime
-import os
+import oracledb # needed for connection to PowerSchool server (ordcle database)
+import sys # needed for  non-scrolling display
+import os # needed for environement variable reading
+import pysftp # needed for sftp file upload
 from datetime import *
 
 un = 'PSNavigator' #PSNavigator is read only, PS is read/write
 pw = os.environ.get('POWERSCHOOL_DB_PASSWORD') #the password for the database account
 cs = os.environ.get('POWERSCHOOL_PROD_DB') #the IP address, port, and database name to connect to
 
+#set up sftp login info, stored as environment variables on system
+sftpUN = os.environ.get('HRRECORDS_SFTP_USERNAME')
+sftpPW = os.environ.get('HRRECORDS_SFTP_PASSWORD')
+sftpHOST = os.environ.get('HRRECORDS_SFTP_ADDRESS')
+cnopts = pysftp.CnOpts(knownhosts='known_hosts') #connection options to use the known_hosts file for key validation
+
 print("Username: " + str(un) + " |Password: " + str(pw) + " |Server: " + str(cs)) #debug so we can see where oracle is trying to connect to/with
+print("SFTP Username: " + str(sftpUN) + " |SFTP Password: " + str(sftpPW) + " |SFTP Server: " + str(sftpHOST)) #debug so we can see what credentials are being used
 badnames = ['USE', 'Training1','Trianing2','Trianing3','Trianing4','Planning','Admin','NURSE','USER', 'USE ', 'TEST', 'TESTTT']
 
 
@@ -30,7 +37,7 @@ with oracledb.connect(user=un, password=pw, dsn=cs) as con: # create the connect
                             sys.stdout.write('\rProccessing staff entry %i' % count) # sort of fancy text to display progress of how many students are being processed without making newlines
                             sys.stdout.flush()
                             # print(entrytuple) # debug
-                            entry = list(entrytuple) # convert tuples to an actual list so we can edit it
+                            entry = list(entrytuple) # convert tuples to an actual list so we can edit it (not needed anymore with only reading values into new variables)
                             if entry[5] == entry[6]: #check the homeschoolid against school id, only print if they match so we dont get duplicates with teachers in multiple buildings
                                 if not entry[2] in badnames and not entry[3] in badnames: #check first and last name against array of bad names, only print if both come back not in it
                                     email = str(entry[0])
@@ -69,5 +76,15 @@ with oracledb.connect(user=un, password=pw, dsn=cs) as con: # create the connect
                         
                 except Exception as er:
                     print('Error:'+str(er))
-
-
+print('')
+with pysftp.Connection(sftpHOST, username=sftpUN, password=sftpPW, cnopts=cnopts) as sftp:
+    print('SFTP connection established')
+    print(sftp.pwd) # debug, show what folder we connected to
+    # print(sftp.listdir())  # debug, show what other files/folders are in the current directory
+    sftp.chdir('/syncNine/Inbound')  # change to the extensionfields folder
+    print(sftp.pwd) # debug, make sure out changedir worked
+    # print(sftp.listdir())
+    sftp.put('StaffData.txt')  # upload the file onto the sftp server
+    print("Staff Data file placed on remote server")
+    sftp.put('Job Types.txt')  # upload the file onto the sftp server
+    print("Job Types file placed on remote server")

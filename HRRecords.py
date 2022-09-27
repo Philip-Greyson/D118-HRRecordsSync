@@ -30,7 +30,7 @@ with oracledb.connect(user=un, password=pw, dsn=cs) as con: # create the connect
                     rows = cur.fetchall()  # fetchall() is used to fetch all records from result set
 
                     # print out header row into files
-                    print('Global Identifier\tEmployee ID\tFirst Name\tLast Name\tWork Email\tBuilding ID\tHome Phone\tBirth Date\tGender\tUsername\tPersonal Email\tMiddle Name\tStreet Address\tCity\tState\tZip\tStatus\tDeactivated\tDCID\t', file=StaffDataOutput)
+                    print('Global Identifier\tEmployee ID\tFirst Name\tLast Name\tWork Email\tBuilding ID\tHome Phone\tBirth Date\tGender\tUsername\tPersonal Email\tMiddle Name\tStreet Address\tCity\tState\tZip\tStatus\tDeactivated\tDCID', file=StaffDataOutput)
                     print('Employee ID\tJob Type\tBuilding ID\tFirst Name\tLast Name', file=JobTypesOutput)
                     for count, entrytuple in enumerate(rows):
                         try:
@@ -52,16 +52,16 @@ with oracledb.connect(user=un, password=pw, dsn=cs) as con: # create the connect
                                     else: # otherwise just consider them staff
                                         staffType = 'Staff'
                                     schoolID = str(entry[5])
-                                    homePhone = str(entry[7])
-                                    birthday = str(entry[8])
-                                    gender = str(entry[9])
-                                    personalEmail = str(entry[11])
-                                    middleName = str(entry[12])
-                                    address = str(entry[13])
-                                    city = str(entry[14])
-                                    state = str(entry[15])
-                                    zipcode = str(entry[16])
-                                    staffStatus = str(entry[17])
+                                    homePhone = str(entry[7]) if entry[7] else ''
+                                    birthday = str(entry[8]) if entry[8] else ''
+                                    gender = str(entry[9]) if entry[9] else ''
+                                    personalEmail = str(entry[11]) if entry[11] else ''
+                                    middleName = str(entry[12]) if entry[12] else ''
+                                    address = str(entry[13]) if entry[13] else ''
+                                    city = str(entry[14]) if entry[14] else ''
+                                    state = str(entry[15]) if entry[15] else ''
+                                    zipcode = str(entry[16]) if entry[16] else ''
+                                    staffStatus = str(entry[17]) if entry[17] else ''
                                     # If staffstatus is 1 they are active so the "deactivated" field is set to false, otherwise set to true
                                     deactivated = 'False' if staffStatus == '1' else 'True'
                                     teacherDCID = str(entry[18])

@@ -47,7 +47,9 @@ with oracledb.connect(user=un, password=pw, dsn=cs) as con: # create the connect
                                     staffType = entry[4]
                                     if staffType == 1: # if their staffstatus is 1 they are a teacher
                                         staffType = 'Teacher'
-                                    elif staffType == 3: # if staffstatus is 3 they are a sub
+                                    elif staffType == 3: # if their staffstatus is 3 they are a lunch staff/playground supervisor
+                                        staffType = 'Lunch Staff'
+                                    elif staffType == 4: # if staffstatus is 4 they are a sub
                                         staffType = 'Substitute'
                                     else: # otherwise just consider them staff
                                         staffType = 'Staff'

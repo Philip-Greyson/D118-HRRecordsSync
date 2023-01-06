@@ -26,7 +26,7 @@ with oracledb.connect(user=un, password=pw, dsn=cs) as con: # create the connect
             with open('Job Types.txt', 'w') as JobTypesOutput:
                 print("Connection established: " + con.version)
                 try:
-                    cur.execute('SELECT teachers.email_addr, teachers.teachernumber, teachers.first_name, teachers.last_name, teachers.staffstatus, teachers.homeschoolid, teachers.schoolid, teachers.home_phone, userscorefields.dob, userscorefields.gender, teachers.email_addr, U_DEF_EXT_SCHOOLSTAFF.HR_PERSONAL_EMAIL, teachers.middle_name, teachers.street, teachers.city, teachers.state, teachers.zip, teachers.status, teachers.users_dcid FROM teachers LEFT JOIN UsersCoreFields ON Teachers.USERS_DCID = UsersCoreFields.UsersDCID LEFT JOIN U_DEF_EXT_SCHOOLSTAFF On Teachers.dcid = U_DEF_EXT_SCHOOLSTAFF.SCHOOLSTAFFDCID WHERE teachers.email_addr IS NOT NULL ORDER BY teachers.users_dcid')
+                    cur.execute('SELECT teachers.email_addr, teachers.teachernumber, teachers.first_name, teachers.last_name, teachers.staffstatus, teachers.homeschoolid, teachers.schoolid, teachers.home_phone, userscorefields.dob, userscorefields.gender, teachers.email_addr, U_HUMANRESOURCES.PERSONAL_EMAIL, teachers.middle_name, teachers.street, teachers.city, teachers.state, teachers.zip, teachers.status, teachers.users_dcid FROM teachers LEFT JOIN UsersCoreFields ON Teachers.USERS_DCID = UsersCoreFields.UsersDCID LEFT JOIN U_HUMANRESOURCES On Teachers.users_dcid = U_HUMANRESOURCES.USERSDCID WHERE teachers.email_addr IS NOT NULL ORDER BY teachers.users_dcid')
                     rows = cur.fetchall()  # fetchall() is used to fetch all records from result set
 
                     # print out header row into files

@@ -2,6 +2,8 @@
 
 https://github.com/Philip-Greyson/D118-HRRecordsSync
 
+Does a query for all staff in PowerSchool, takes their data and arranges it for use in HR Records, then uploads it via SFTP to their server.
+
 See the following for PS table information:
 https://ps.powerschool-docs.com/pssis-data-dictionary/latest/teachers-ver7-8-0
 https://ps.powerschool-docs.com/pssis-data-dictionary/latest/userscorefields-ver7-7-1
@@ -27,6 +29,8 @@ SFTP_HOST = os.environ.get('HRRECORDS_SFTP_ADDRESS')
 CNOPTS = pysftp.CnOpts(knownhosts='known_hosts')  # connection options to use the known_hosts file for key validation
 
 SFTP_OUTPUT_DIRECTORY = '/syncNine/Inbound'
+STAFF_DATA_FILENAME = 'StaffData.txt'
+JOB_TYPES_FILENAME = 'Job Types.txt'
 
 print(f"Username: {DB_UN} | Password: {DB_PW} | Server: {DB_CS}")  # debug so we can see where oracle is trying to connect to/with
 print(f"SFTP Username: {SFTP_UN} | SFTP Password: {SFTP_PW} | SFTP Server: {SFTP_HOST}")  # debug so we can see where pysftp is trying to connect to/with
@@ -39,8 +43,8 @@ if __name__ == '__main__':  # main file execution
         startTime = startTime.strftime('%H:%M:%S')
         print(f'INFO: Execution started at {startTime}')
         print(f'INFO: Execution started at {startTime}', file=log)
-        with open('StaffData.txt', 'w') as StaffDataOutput:
-            with open('Job Types.txt', 'w') as JobTypesOutput:
+        with open(STAFF_DATA_FILENAME, 'w') as StaffDataOutput:
+            with open(JOB_TYPES_FILENAME, 'w') as JobTypesOutput:
                 # print out header rows into files, column names with tab delimiters
                 print('Global Identifier\tEmployee ID\tFirst Name\tLast Name\tWork Email\tBuilding ID\tHome Phone\tBirth Date\tGender\tUsername\tPersonal Email\tMiddle Name\tStreet Address\tCity\tState\tZip\tStatus\tDeactivated\tDCID', file=StaffDataOutput)
                 print('Employee ID\tJob Type\tBuilding ID\tFirst Name\tLast Name', file=JobTypesOutput)
@@ -102,20 +106,24 @@ if __name__ == '__main__':  # main file execution
                     print(f'ERROR while connecting to PS Database or running initial query: {er}')
                     print(f'ERROR while connecting to PS Database or running initial query: {er}', file=log)
 
-        with pysftp.Connection(SFTP_HOST, username=SFTP_UN, password=SFTP_PW, cnopts=CNOPTS) as sftp:
-            print(f'INFO: SFTP connection to HR Records at {SFTP_HOST} successfully established')
-            print(f'INFO: SFTP connection to HR Records at {SFTP_HOST} successfully established', file=log)
-            # print(sftp.pwd)  # debug, show what folder we connected to
-            # print(sftp.listdir())  # debug, show what other files/folders are in the current directory
-            sftp.chdir(SFTP_OUTPUT_DIRECTORY)  # change to the extensionfields folder
-            # print(sftp.pwd)  # debug, make sure out changedir worked
-            # print(sftp.listdir())
-            sftp.put('StaffData.txt')  # upload the file onto the sftp server
-            print("INFO: Staff Data file placed on remote server")
-            print("INFO: Staff Data file placed on remote server", file=log)
-            sftp.put('Job Types.txt')  # upload the file onto the sftp server
-            print("INFO: Job Types file placed on remote server")
-            print("INFO: Job Types file placed on remote server", file=log)
+        try:
+            with pysftp.Connection(SFTP_HOST, username=SFTP_UN, password=SFTP_PW, cnopts=CNOPTS) as sftp:
+                print(f'INFO: SFTP connection to HR Records at {SFTP_HOST} successfully established')
+                print(f'INFO: SFTP connection to HR Records at {SFTP_HOST} successfully established', file=log)
+                # print(sftp.pwd)  # debug, show what folder we connected to
+                # print(sftp.listdir())  # debug, show what other files/folders are in the current directory
+                sftp.chdir(SFTP_OUTPUT_DIRECTORY)  # change to the extensionfields folder
+                # print(sftp.pwd)  # debug, make sure out changedir worked
+                # print(sftp.listdir())
+                sftp.put(STAFF_DATA_FILENAME)  # upload the file onto the sftp server
+                print("INFO: Staff Data file placed on remote server")
+                print("INFO: Staff Data file placed on remote server", file=log)
+                sftp.put(JOB_TYPES_FILENAME)  # upload the file onto the sftp server
+                print("INFO: Job Types file placed on remote server")
+                print("INFO: Job Types file placed on remote server", file=log)
+        except Exception as er:
+            print(f'ERROR while connecting or uploading to SFTP server: {er}')
+            print(f'ERROR while connecting or uploading to SFTP server: {er}', file=log)
 
         endTime = datetime.now()
         endTime = endTime.strftime('%H:%M:%S')

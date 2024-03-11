@@ -54,9 +54,9 @@ if __name__ == '__main__':  # main file execution
                             print("Connection established - version: " + con.version)
                             print("Connection established - version: " + con.version, file=log)
                             # do the main SQL query for all staff members
-                            cur.execute('SELECT teachers.email_addr, teachers.teachernumber, teachers.first_name, teachers.last_name, teachers.staffstatus, teachers.homeschoolid, teachers.schoolid, teachers.home_phone, userscorefields.dob, userscorefields.gender, teachers.email_addr, u_humanresources.personal_email, teachers.middle_name, teachers.street, teachers.city, teachers.state, teachers.zip, teachers.status, teachers.users_dcid\
-                                        FROM teachers LEFT JOIN UsersCoreFields ON Teachers.USERS_DCID = UsersCoreFields.UsersDCID LEFT JOIN u_humanresources ON teachers.users_dcid = u_humanresources.usersdcid\
-                                        WHERE teachers.email_addr IS NOT NULL ORDER BY teachers.users_dcid')
+                            cur.execute('SELECT teachers.email_addr, teachers.teachernumber, teachers.first_name, teachers.last_name, teachers.staffstatus, teachers.homeschoolid, teachers.schoolid, teachers.home_phone, userscorefields.dob, userscorefields.gender, teachers.email_addr, u_humanresources.personal_email, teachers.middle_name, teachers.street, teachers.city, teachers.state, teachers.zip, teachers.status, teachers.users_dcid, s_il_usr_x.legal_first_name, s_il_usr_x.legal_last_name\
+                            FROM teachers LEFT JOIN UsersCoreFields ON Teachers.USERS_DCID = UsersCoreFields.UsersDCID LEFT JOIN u_humanresources ON teachers.users_dcid = u_humanresources.usersdcid LEFT JOIN s_il_usr_x ON teachers.users_dcid = s_il_usr_x.usersdcid\
+                            WHERE teachers.email_addr IS NOT NULL ORDER BY teachers.users_dcid')
                             staffMembers = cur.fetchall()  # fetchall() is used to fetch all records from result set
                             for staff in staffMembers:
                                 try:
@@ -64,8 +64,8 @@ if __name__ == '__main__':  # main file execution
                                         if not staff[2].lower() in badnames and not staff[3].lower() in badnames:  # check first and last name against array of bad names, only print if both come back not in it
                                             email = str(staff[0])
                                             teacherNum = staff[1]
-                                            firstName = str(staff[2])
-                                            lastName = str(staff[3])
+                                            firstName = str(staff[19]) if staff[19] else str(staff[2])  # use the legal first name field if it exists, otherwise use the normal first name field
+                                            lastName = str(staff[20]) if staff[20] else str(staff[3])  # use the legal last name field if it exists, otherwise use the normal last name field
                                             staffType = staff[4]
                                             if staffType == 1:  # if their staffstatus is 1 they are a teacher
                                                 staffType = 'Teacher'
